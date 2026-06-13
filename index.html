@@ -73,14 +73,14 @@
   <div id="habits-container"></div>
 
   <script>
-    // === НАСТРОЙКА FB ===
+    // === НАСТРОЙКА БАЗЫ ДАННЫХ ===
     const firebaseConfig = {
-      databaseURL: "ВСТАВЬ_СЮДА_СВОЮ_ССЫЛКУ_ИЗ_FIREBASE"
+      databaseURL: "https://console.firebase.google.com/u/0/project/ourhabbits-4f0f2/database/ourhabbits-4f0f2-default-rtdb/data/~2F"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Слушаем изменения в базе данных (работает в реальном времени)
+    // Слушаем изменения в базе данных в реальном времени
     db.ref('habits').on('value', (snapshot) => {
       const habitsData = snapshot.val();
       const container = document.getElementById('habits-container');
