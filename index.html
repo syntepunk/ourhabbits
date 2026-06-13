@@ -11,26 +11,66 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <style>
-    :root { --bg-color: #000; --card-bg: #1c1c1e; --text-main: #fff; --blue-active: #0a84ff; --blue-dim: rgba(10, 132, 255, 0.12); --pink-active: #ff2d55; --pink-dim: rgba(255, 45, 85, 0.12); }
-    body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; padding-top: calc(20px + env(safe-area-inset-top)); -webkit-user-select: none; padding-bottom: 60px; }
+    :root { 
+      --bg-color: #131114; /* Глубокий винтажный темный */
+      --card-bg: #1c191f; 
+      --text-main: #f5f4f6; 
+      --blue-active: #9bcad6; /* Пастельный голубой (Илья) */
+      --blue-dim: rgba(155, 202, 214, 0.12);
+      --pink-active: #efa2b4; /* Пастельный розовый (Соня) */
+      --pink-dim: rgba(239, 162, 180, 0.12);
+    }
+    body { 
+      font-family: -apple-system, sans-serif; 
+      background-color: var(--bg-color); 
+      color: var(--text-main); 
+      margin: 0; 
+      padding: 20px; 
+      padding-top: calc(20px + env(safe-area-inset-top));
+      -webkit-user-select: none; 
+      padding-bottom: 60px; 
+    }
+    
     .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    h1 { font-size: 32px; font-weight: bold; margin: 0; }
-    .add-btn { background: #2c2c2e; color: var(--blue-active); border: none; padding: 10px 16px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; }
-    .legend { font-size: 14px; color: #8e8e93; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+    h1 { font-size: 32px; font-weight: bold; margin: 0; color: #efa2b4; }
+    .add-btn { background: #26222b; color: var(--blue-active); border: none; padding: 10px 16px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; }
+    
+    /* Форма создания новой активности */
+    .create-form { background: var(--card-bg); border-radius: 18px; padding: 16px; margin-bottom: 20px; display: none; border: 1px solid #322b38; }
+    .create-form h3 { margin: 0 0 12px 0; font-size: 18px; color: var(--blue-active); }
+    .form-group { margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 13px; color: #a19ba8; }
+    .form-group input[type="text"], .form-group select { background: #26222b; border: 1px solid #322b38; color: #fff; padding: 10px; border-radius: 10px; font-size: 15px; }
+    .color-picker-wrapper { display: flex; align-items: center; gap: 12px; }
+    .form-group input[type="color"] { -webkit-appearance: none; border: none; width: 44px; height: 44px; border-radius: 10px; background: none; cursor: pointer; }
+    .form-group input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    .form-group input[type="color"]::-webkit-color-swatch { border: 1px solid #322b38; border-radius: 10px; }
+    .form-buttons { display: flex; gap: 10px; margin-top: 5px; }
+    .form-buttons button { flex: 1; padding: 12px; border-radius: 10px; font-size: 15px; font-weight: 600; border: none; cursor: pointer; }
+    .save-btn { background: var(--pink-active); color: #000; }
+    .cancel-btn { background: #26222b; color: #fff; }
+
+    .legend { font-size: 14px; color: #a19ba8; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
     .legend-item { display: flex; align-items: center; gap: 6px; }
     .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .habit-card { background-color: var(--card-bg); border-radius: 18px; padding: 18px; margin-bottom: 20px; }
+    
+    /* Карточка привычки */
+    .habit-card { background-color: var(--card-bg); border-radius: 18px; padding: 18px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
     .habit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     .habit-title { font-size: 18px; font-weight: 600; max-width: 75%; word-wrap: break-word; }
-    .delete-btn { background: none; border: none; color: #ff453a; font-size: 13px; padding: 4px; cursor: pointer; }
+    .delete-btn { background: none; border: none; color: #ff453a; font-size: 13px; padding: 4px; cursor: pointer; opacity: 0.6; }
+    
     .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-    .day-cell { background-color: #2c2c2e; border-radius: 10px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; }
-    .day-number { font-size: 12px; font-weight: bold; color: #8e8e93; margin-bottom: 6px; }
+    .day-cell { background-color: #26222b; border-radius: 10px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; border: 1px solid rgba(255,255,255,0.02); }
+    .day-number { font-size: 12px; font-weight: bold; color: #726c78; margin-bottom: 6px; }
+    
     .dots-container { display: flex; gap: 5px; }
     .dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; cursor: pointer; transition: 0.2s; }
-    .dot.blue { background-color: var(--blue-dim); border: 1px solid rgba(10, 132, 255, 0.3); }
+    
+    .dot.blue { background-color: var(--blue-dim); border: 1px solid rgba(155, 202, 214, 0.2); }
     .dot.blue.active { background-color: var(--blue-active); box-shadow: 0 0 8px var(--blue-active); border: none; }
-    .dot.pink { background-color: var(--pink-dim); border: 1px solid rgba(255, 45, 85, 0.3); }
+    
+    .dot.pink { background-color: var(--pink-dim); border: 1px solid rgba(239, 162, 180, 0.2); }
     .dot.pink.active { background-color: var(--pink-active); box-shadow: 0 0 8px var(--pink-active); border: none; }
   </style>
 </head>
@@ -38,12 +78,38 @@
 
   <div class="top-bar">
     <h1>Активности</h1>
-    <button class="add-btn" onclick="addHabit()">+ Создать</button>
+    <button class="add-btn" onclick="toggleForm(true)">+ Создать</button>
+  </div>
+
+  <div id="create-form" class="create-form">
+    <h3>Новая активность</h3>
+    <div class="form-group">
+      <label>Название</label>
+      <input type="text" id="habit-title" placeholder="например, Спорт или Питание">
+    </div>
+    <div class="form-group">
+      <label>Количество дней</label>
+      <select id="habit-days">
+        <option value="31">31 день</option>
+        <option value="30">30 дней</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Цвет категории (RGB палитра)</label>
+      <div class="color-picker-wrapper">
+        <input type="color" id="habit-color" value="#0a84ff">
+        <span style="font-size: 14px; color: #a19ba8;">Нажми, чтобы настроить цвет</span>
+      </div>
+    </div>
+    <div class="form-buttons">
+      <button class="cancel-btn" onclick="toggleForm(false)">Отмена</button>
+      <button class="save-btn" onclick="saveHabit()">Сохранить</button>
+    </div>
   </div>
   
   <div class="legend">
     <div class="legend-item"><div class="legend-dot" style="background: var(--blue-active)"></div> Илья</div>
-    <div class="legend-item"><div class="legend-dot" style="background: var(--pink-active)"></div> Девушка</div>
+    <div class="legend-item"><div class="legend-dot" style="background: var(--pink-active)"></div> Соня</div>
   </div>
 
   <div id="habits-container"></div>
@@ -56,6 +122,14 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    function toggleForm(show) {
+      document.getElementById('create-form').style.display = show ? 'block' : 'none';
+      if(show) {
+        document.getElementById('habit-title').value = '';
+        document.getElementById('habit-color').value = '#0a84ff';
+      }
+    }
+
     db.ref('habits').on('value', (snapshot) => {
       const habitsData = snapshot.val();
       const container = document.getElementById('habits-container');
@@ -65,10 +139,12 @@
 
       Object.keys(habitsData).forEach(id => {
         const habit = habitsData[id];
+        const cardColor = habit.color || '#2c2c2e'; // Берем кастомный цвет или дефолт
+        
         let cardHtml = `
-          <div class="habit-card">
+          <div class="habit-card" style="border-left: 6px solid ${cardColor};">
             <div class="habit-header">
-              <div class="habit-title">${habit.title} (${habit.days} дн.)</div>
+              <div class="habit-title" style="color: ${cardColor};">${habit.title} (${habit.days} дн.)</div>
               <button class="delete-btn" onclick="deleteHabit('${id}')">Удалить</button>
             </div>
             <div class="calendar-grid">
@@ -103,21 +179,28 @@
       });
     }
 
-    function addHabit() {
-      const title = prompt("Название новой активности:");
-      if (!title) return;
-      let days = prompt("Количество дней (30 или 31)?", "31");
-      if (days !== "30" && days !== "31") days = "31";
+    function saveHabit() {
+      const title = document.getElementById('habit-title').value.trim();
+      const days = parseInt(document.getElementById('habit-days').value);
+      const color = document.getElementById('habit-color').value;
+
+      if (!title) {
+        alert("Введите название активности");
+        return;
+      }
       
-      let emptyProg = "0".repeat(parseInt(days));
+      let emptyProg = "0".repeat(days);
       const newHabitRef = db.ref('habits').push();
       
       newHabitRef.set({
         title: title,
-        days: parseInt(days),
+        days: days,
+        color: color,
         user1_prog: emptyProg,
         user2_prog: emptyProg
       });
+
+      toggleForm(false);
     }
 
     function deleteHabit(id) {
